@@ -7,7 +7,12 @@ h1 {
 	color: white;
 }
 
+.adventure {
+	height: 500px;
+}
+
 .adventure-text {
+	font-family: 'Droid Sans Mono', sans-serif;
 	color: white;
 }
 

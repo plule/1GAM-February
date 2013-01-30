@@ -1,8 +1,24 @@
+$.fn.makeAbsolute = function(rebase) {
+    return $(this.get().reverse()).each(function() { //omg this reverse is ugly
+        var el = $(this);
+        var pos = el.position();
+        el.css({ position: "absolute",
+            marginLeft: 0, marginTop: 0,
+            top: pos.top, left: pos.left });
+        if (rebase)
+            el.remove().appendTo("body");
+    });
+}
+
 var transitionTo = function(node) {
-	$('#adventure').fadeOut(200, function() {
-		$('#adventure').empty();
-		$('#adventure').append(buildNode(node));
-		$('#adventure').fadeIn(200);
+	$('.adventure-text').makeAbsolute();
+	$(':not(.clicked).adventure-text').fadeOut(500, function() {
+		$('.clicked').fadeOut(500, function() {
+			$('#adventure').empty();
+			$('#adventure').append(buildNode(node));
+			$('#adventure').fadeOut(0); // todo : why
+			$('#adventure').fadeIn(500);
+		});
 	});
 }
 
@@ -10,14 +26,23 @@ var PropertyFunctions = {
 	clickDestination: function(element, parameter) {
 		element.addClass('clickable')
 			.click(function(e) {
+				$(this).addClass('clicked');
 				transitionTo(Adventure.nodes[parameter]);
 			});
 	}
 }
 
+var buildStringHtml = function(text) {
+	var output = $('<span>');
+	for(chr in text) {
+		output.append($('<span>'+text[chr]+'</span>').addClass('char'));
+	}
+	return output;
+}
+
 var buildHtml = function(text, properties) {
 	if(!text) { return $('')};
-	var output = $('<span>').append(text).addClass('adventure-text');
+	var output = buildStringHtml(text).addClass('adventure-text');
 	for (var property in properties) {
 		if(PropertyFunctions[property]) {
 			PropertyFunctions[property](output, properties[property]);
@@ -74,7 +99,7 @@ var validateAdventure = function(adventure) {
 
 var valid = validateAdventure(Adventure);
 if(valid == null) {
-	transitionTo(Adventure.nodes[Adventure.startNode]);
+	$('#adventure').append(buildNode(Adventure.nodes[Adventure.startNode]));
 } else {
 	alert(valid)
 }
