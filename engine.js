@@ -1,34 +1,44 @@
-var parseText = function(text) {
+var transitionTo = function(node) {
+	$('#adventure').empty();
+	$('#adventure').append(buildNode(node));
+}
+
+var buildHtml = function(text, properties) {
+	if(properties) {
+		return $('<span>')
+			.append(text)
+			.addClass('format-text')
+			.click(function(e) {
+				transitionTo(Adventure.nodes[properties.clickDestination]);
+			})
+	} else if(text) {
+		return $('<span>')
+			.append(text)
+			.addClass('raw-text');
+	} else {
+		return $('');
+	}
+}
+
+var buildNode = function(node) {
 	var output = $(document.createElement('div'));
 	var linkExp =  /\[([^\[\]\|]+)\|(\w+)\]/g;
-	
+	var text = node.text;
+
 	var lastIndex = 0;
 	while((regArray = linkExp.exec(text)) !== null) {
 		
-		var rawText = text.substring(lastIndex, regArray.index);
-		if(rawText) {
-			output.append($('<span>')
-						  .append(rawText)
-						  .addClass('raw-text'))
-		}
-		
-		output.append($('<span>')
-					  .append(regArray[1])
-					  .addClass('format-text'));
+		output.append(buildHtml(text.substring(lastIndex, regArray.index)));
+		// regArray[1] : disp text, regArray[2] : property name
+		output.append(buildHtml(regArray[1], node.properties[regArray[2]]));
 
 		lastIndex = linkExp.lastIndex;
 	}
-	var rawText = text.substring(lastIndex);
-	if(rawText) {
-		output.append($('<span>')
-					  .append(rawText)
-					  .addClass('raw-text'));
-	}
+	output.append(buildHtml(text.substring(lastIndex)));
 
 	return output;
 }
 
-var CurrentNode = Adventure.nodes[Adventure.startNode];
+transitionTo(Adventure.nodes[Adventure.startNode]);
 
-var output = parseText(CurrentNode.text);
-$('#adventure').append(output);//adventure.nodes.roomNode.text);
+

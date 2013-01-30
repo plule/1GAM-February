@@ -1,23 +1,26 @@
 Adventure = {
     nodes: {
-        roomNode: {
-            text: "[text|textLink][textagain|ya] is a link. [This one|textBis] too and can be transformed",
+        start: {
+            text: "You start. Go to [hall|hall]. Go to [room|room].",
             properties: {
-                textLink: {
-                    clickDestination: "hallNode"
-                },
-                textBis: {
-                    clickDestination: "hallNode",
-                    waveText: "Hidden text"
-                }
+				hall: {clickDestination: "hall"},
+				room: {clickDestination: "room"}
             }
 		},
-        hallNode: {
-            text: "This is a simple node without link. But it has an [obfuscated|obfText] text.",
+        room: {
+            text: "You room. Go to [hall|hall]. Go to [start|start].",
             properties: {
-                obfText: {obfuscated: true}
+				hall: {clickDestination: "hall"},
+				start: {clickDestination: "start"}
             }
-        }
+        },
+		hall: {
+			text: "You hall. Go to [start|start]. Go to [room|room].",
+            properties: {
+				start: {clickDestination: "start"},
+				room: {clickDestination: "room"}
+            }
+		}
     },
-	startNode: 'roomNode'
+	startNode: 'start'
 }
