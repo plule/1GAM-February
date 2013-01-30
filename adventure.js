@@ -1,26 +1,26 @@
 Adventure = {
     nodes: {
-        start: {
-            text: "You start. Go to [hall|hall]. Go to [room|room].",
+        beginNode: {
+            text: "You begin. Go to [The Hall|hall]. Go to [The Room|room].",
             properties: {
-				hall: {clickDestination: "hall"},
-				room: {clickDestination: "room"}
+				hall: {clickDestination: "hallNode"},
+				room: {clickDestination: "roomNode"}
             }
 		},
-        room: {
-            text: "You room. Go to [hall|hall]. Go to [start|start].",
+        roomNode: {
+            text: "You room. Go to [The Hall|hall]. Go to [The Beginning|begin].",
             properties: {
-				hall: {clickDestination: "hall"},
-				start: {clickDestination: "start"}
+				hall: {clickDestination: "hallNode"},
+				begin: {clickDestination: "beginNode"}
             }
         },
-		hall: {
-			text: "You hall. Go to [start|start]. Go to [room|room].",
+		hallNode: {
+			text: "You hall. Go to [The Beginning|begin]. Go to [The Room|room].",
             properties: {
-				start: {clickDestination: "start"},
-				room: {clickDestination: "room"}
+				begin: {clickDestination: "beginNode"},
+				room: {clickDestination: "roomNode"}
             }
 		}
     },
-	startNode: 'start'
+	startNode: 'beginNode'
 }
