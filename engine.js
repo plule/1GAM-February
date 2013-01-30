@@ -44,6 +44,37 @@ var buildNode = function(node) {
 	return output;
 }
 
-transitionTo(Adventure.nodes[Adventure.startNode]);
+var validateAdventure = function(adventure) {
+	if(!adventure.nodes) {
+		return "Adventure must have a nodes member";
+	} else if(!adventure.startNode) {
+		return "Adventure must have a startNode member";
+	} else if(!adventure.nodes[adventure.startNode]) {
+		return "The startNode does not exists";
+	} else {
+		for (var nodeName in adventure.nodes) {
+			node = adventure.nodes[nodeName]
+			if(!node.text) {
+				return "The node '"+nodeName+"' doesn't not have any text";
+			} else if(node.properties) {
+				for (var propertyNode in node.properties) {
+					for (var property in node.properties[propertyNode]) {
+						if(property == "clickDestination" && !adventure.nodes[
+							node.properties[propertyNode][property]
+						]) {
+							return "The node '"+nodeName+"' have a property '"+propertyNode+"' with clickDestination pointing to '"+node.properties[propertyNode][property]+"' wich is not a node.";
+						}
+					}
+				}
+			}
+		}
+	}
+	return null;
+}
 
-
+var valid = validateAdventure(Adventure);
+if(valid == null) {
+	transitionTo(Adventure.nodes[Adventure.startNode]);
+} else {
+	alert(valid)
+}
