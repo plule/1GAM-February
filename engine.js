@@ -3,21 +3,24 @@ var transitionTo = function(node) {
 	$('#adventure').append(buildNode(node));
 }
 
-var buildHtml = function(text, properties) {
-	if(properties) {
-		return $('<span>')
-			.append(text)
-			.addClass('format-text')
+var PropertyFunctions = {
+	clickDestination: function(element, parameter) {
+		element.addClass('clickable')
 			.click(function(e) {
-				transitionTo(Adventure.nodes[properties.clickDestination]);
-			})
-	} else if(text) {
-		return $('<span>')
-			.append(text)
-			.addClass('raw-text');
-	} else {
-		return $('');
+				transitionTo(Adventure.nodes[parameter]);
+			});
 	}
+}
+
+var buildHtml = function(text, properties) {
+	if(!text) { return $('')};
+	var output = $('<span>').append(text).addClass('adventure-text');
+	for (var property in properties) {
+		if(PropertyFunctions[property]) {
+			PropertyFunctions[property](output, properties[property]);
+		}
+	}
+	return output;
 }
 
 var buildNode = function(node) {
@@ -28,14 +31,13 @@ var buildNode = function(node) {
 	var lastIndex = 0;
 	while((regArray = linkExp.exec(text)) !== null) {
 		
-		output.append(buildHtml(text.substring(lastIndex, regArray.index)));
+		output.append(buildHtml(text.substring(lastIndex, regArray.index), {}));
 		// regArray[1] : disp text, regArray[2] : property name
 		output.append(buildHtml(regArray[1], node.properties[regArray[2]]));
 
 		lastIndex = linkExp.lastIndex;
 	}
-	output.append(buildHtml(text.substring(lastIndex)));
-
+	output.append(buildHtml(text.substring(lastIndex), {}));
 	return output;
 }
 
