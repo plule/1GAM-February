@@ -1,0 +1,16 @@
+body
+{
+	background-color:black;
+}
+
+h1 {
+	color: white;
+}
+
+.adventure-text {
+	color: white;
+}
+
+.clickable {
+	font-weight: bold;
+}

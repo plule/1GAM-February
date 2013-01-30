@@ -1,6 +1,9 @@
 var transitionTo = function(node) {
-	$('#adventure').empty();
-	$('#adventure').append(buildNode(node));
+	$('#adventure').fadeOut(200, function() {
+		$('#adventure').empty();
+		$('#adventure').append(buildNode(node));
+		$('#adventure').fadeIn(200);
+	});
 }
 
 var PropertyFunctions = {
