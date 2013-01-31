@@ -32,12 +32,12 @@ var mFade = function(element, time, callback) {
  */
 var transitionTo = function(node) {
 	makeAbsolute($('.char'));
-	mFade($(':not(.clicked).adventure-text'), 1000, function() {
-		mFade($('.adventure-text.clicked'), 1000, function() {
+	mFade($(':not(.clicked).adventure-text'), 200, function() {
+		mFade($('.adventure-text.clicked'), 200, function() {
 			$('#adventure').empty();
 			$('#adventure').append(buildNode(node));
 			$('#adventure').hide(); // todo : why
-			$('#adventure').fadeIn(1000);
+			$('#adventure').fadeIn(200);
 		});
 	});;
 }
