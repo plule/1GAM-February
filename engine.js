@@ -10,6 +10,9 @@ $.fn.makeAbsolute = function(rebase) {
     });
 }
 
+/*
+ * Move to another node
+ */
 var transitionTo = function(node) {
 	$('.adventure-text').makeAbsolute();
 	$(':not(.clicked).adventure-text').fadeOut(500, function() {
@@ -22,16 +25,80 @@ var transitionTo = function(node) {
 	});
 }
 
+/*
+ * Flag management
+ */
+var Flags = {};
+
+var addCallback = function(element, func) {
+	if(!element.callbacks) {
+		element.callbacks = [];
+	}
+	element.callbacks.push(func);
+}
+
+var setValue = function(flagString, value) {
+	flags = flagString.split(',');
+	for (i in flags) {
+		Flags[flags[i]] = value;
+	}
+}
+
+var allTrue = function(flagString) {
+	flags = flagString.split(',');
+	for(i in flags) {
+		if(!Flags[flags[i]]) { return false };
+	}
+	return true;
+}
+
+/*
+ * Functions executed when entering a node
+ */
+var NodeFunctions = {
+	setTrue: function(node, parameter) {setValue(parameter, true)},
+	setFalse: function(node, parameter) {setValue(parameter, false)}
+}
+
+/*
+ * Function executed to add property to element (clickable, etc...)
+ */
 var PropertyFunctions = {
 	clickDestination: function(element, parameter) {
 		element.addClass('clickable')
 			.click(function(e) {
 				$(this).addClass('clicked');
+				for(i in element.callbacks) {
+					element.callbacks[i]();
+				}
 				transitionTo(Adventure.nodes[parameter]);
 			});
+	},
+
+	setTrue: function(element, parameter) {
+		addCallback(element, function() {setValue(parameter, true)});
+	},
+
+	setFalse: function(element, parameter) {
+		addCallback(element, function() {setValue(parameter, true)});
+	},
+
+	visibleIf: function(element, parameter) {
+		if(!allTrue(parameter)) {
+			$(element).hide();
+		}
+	},
+
+	visibleUnless: function(element, parameter) {
+		if(allTrue(parameter)) {
+			$(element).hide();
+		}
 	}
 }
 
+/*
+ * Build html element for a string separing each character
+ */
 var buildStringHtml = function(text) {
 	var output = $('<span>');
 	for(chr in text) {
@@ -40,6 +107,9 @@ var buildStringHtml = function(text) {
 	return output;
 }
 
+/*
+ * Build html element of a element (formatted or not)
+ */
 var buildHtml = function(text, properties) {
 	if(!text) { return $('')};
 	var output = buildStringHtml(text).addClass('adventure-text');
@@ -51,7 +121,21 @@ var buildHtml = function(text, properties) {
 	return output;
 }
 
+/*
+ * Build html element of a complete node
+ */
 var buildNode = function(node) {
+	/* Execute onEnter */
+	for(onEnterFunc in node.onEnter) {
+		if(NodeFunctions[onEnterFunc]) {
+			NodeFunctions[onEnterFunc](node, node.onEnter[onEnterFunc]);
+		}
+	}
+
+/*	console.log("Flags :");
+	console.log(Flags);*/
+
+	/* Build the html itself */
 	var output = $(document.createElement('div'));
 	var linkExp =  /\[([^\[\]\|]+)\|(\w+)\]/g;
 	var text = node.text;
@@ -66,9 +150,13 @@ var buildNode = function(node) {
 		lastIndex = linkExp.lastIndex;
 	}
 	output.append(buildHtml(text.substring(lastIndex), {}));
+
 	return output;
 }
 
+/*
+ * Rough check of the consistency of the adventure
+ */
 var validateAdventure = function(adventure) {
 	if(!adventure.nodes) {
 		return "Adventure must have a nodes member";

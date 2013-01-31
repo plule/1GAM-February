@@ -1,10 +1,16 @@
 Adventure = {
     nodes: {
         beginNode: {
-            text: "You begin. Go to [The Hall|hall]. Go to [The Room|room].",
+            text: "You begin. Go to [The Hall|hall]. Go to [The Room|room].\
+[ You don't have explored everything yet.|notEveryThingDiscovered]\
+[ You already have visited The Room.|alreadyVisitedRoom]\
+[ You already have visited The Hall.|alreadyVisitedHall]",
             properties: {
 				hall: {clickDestination: "hallNode"},
-				room: {clickDestination: "roomNode"}
+				room: {clickDestination: "roomNode", setTrue: "visitedRoom"},
+				alreadyVisitedRoom : {visibleIf: "visitedRoom"},
+				alreadyVisitedHall : {visibleIf: "visitedHall"},
+				notEveryThingDiscovered: {visibleUnless: "visitedHall,visitedRoom"}
             }
 		},
         roomNode: {
@@ -18,8 +24,11 @@ Adventure = {
 			text: "You hall. Go to [The Beginning|begin]. Go to [The Room|room].",
             properties: {
 				begin: {clickDestination: "beginNode"},
-				room: {clickDestination: "roomNode"}
-            }
+				room: {clickDestination: "roomNode", setTrue: "visitedRoom"}
+            },
+			onEnter: {
+				setTrue: "visitedHall,testFlag"
+			}
 		}
     },
 	startNode: 'beginNode'
