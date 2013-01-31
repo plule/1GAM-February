@@ -10,19 +10,36 @@ $.fn.makeAbsolute = function(rebase) {
     });
 }
 
+var makeAbsolute = function(elements) {
+	$(elements).each(function(i, element) {
+		element.tempPos = $(element).position();
+	});
+	$(elements).each(function(i, element) {
+		$(element).css({ position: "absolute",
+					  marginLeft: 0, marginTop: 0,
+					  top: element.tempPos.top, left: element.tempPos.left });
+	});
+}
+
+/* Quick hack to avoid multiple call to callback function when using fadeout*/
+var mFade = function(element, time, callback) {
+	element.fadeOut(time);
+	setTimeout(callback, time);
+}
+
 /*
  * Move to another node
  */
 var transitionTo = function(node) {
-	$('.adventure-text').makeAbsolute();
-	$(':not(.clicked).adventure-text').fadeOut(500, function() {
-		$('.clicked').fadeOut(500, function() {
+	makeAbsolute($('.char'));
+	mFade($(':not(.clicked).adventure-text'), 1000, function() {
+		mFade($('.adventure-text.clicked'), 1000, function() {
 			$('#adventure').empty();
 			$('#adventure').append(buildNode(node));
-			$('#adventure').fadeOut(0); // todo : why
-			$('#adventure').fadeIn(500);
+			$('#adventure').hide(); // todo : why
+			$('#adventure').fadeIn(1000);
 		});
-	});
+	});;
 }
 
 /*
@@ -67,7 +84,7 @@ var PropertyFunctions = {
 	clickDestination: function(element, parameter) {
 		element.addClass('clickable')
 			.click(function(e) {
-				$(this).addClass('clicked');
+				$(element).addClass('clicked');
 				for(i in element.callbacks) {
 					element.callbacks[i]();
 				}

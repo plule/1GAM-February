@@ -4,13 +4,15 @@ Adventure = {
             text: "You begin. Go to [The Hall|hall]. Go to [The Room|room].\
 [ You don't have explored everything yet.|notEveryThingDiscovered]\
 [ You already have visited The Room.|alreadyVisitedRoom]\
-[ You already have visited The Hall.|alreadyVisitedHall]",
+[ You already have visited The Hall.|alreadyVisitedHall]\
+[ You have visited everything.|everythingVisited]",
             properties: {
 				hall: {clickDestination: "hallNode"},
 				room: {clickDestination: "roomNode", setTrue: "visitedRoom"},
-				alreadyVisitedRoom : {visibleIf: "visitedRoom"},
-				alreadyVisitedHall : {visibleIf: "visitedHall"},
-				notEveryThingDiscovered: {visibleUnless: "visitedHall,visitedRoom"}
+				alreadyVisitedRoom: {visibleIf: "visitedRoom"},
+				alreadyVisitedHall: {visibleIf: "visitedHall"},
+				notEveryThingDiscovered: {visibleUnless: "visitedHall,visitedRoom"},
+				everythingVisited: {visibleIf: "visitedHall,visitedRoom"}
             }
 		},
         roomNode: {
