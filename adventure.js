@@ -16,10 +16,11 @@ Adventure = {
             }
 		},
         roomNode: {
-            text: "You room. Go to [The Hall|hall]. Go to [The Beginning|begin].",
+            text: "You room. Go to [The Hall|hall]. Go to [The Beginning|begin]. [Look, this text is strange.|decayingText]",
             properties: {
 				hall: {clickDestination: "hallNode"},
-				begin: {clickDestination: "beginNode"}
+				begin: {clickDestination: "beginNode"},
+				decayingText: {obfuscated: true, waveable: true}
             }
         },
 		hallNode: {

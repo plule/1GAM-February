@@ -1,13 +1,32 @@
-$.fn.makeAbsolute = function(rebase) {
-    return $(this.get().reverse()).each(function() { //omg this reverse is ugly
-        var el = $(this);
-        var pos = el.position();
-        el.css({ position: "absolute",
-            marginLeft: 0, marginTop: 0,
-            top: pos.top, left: pos.left });
-        if (rebase)
-            el.remove().appendTo("body");
-    });
+function random_character() {
+	return String.fromCharCode(Math.random() * (126 - 32) + 32);
+}
+
+/*
+  Source : http://james.padolsey.com/javascript/deep-copying-of-objects-and-arrays/
+*/
+function deepCopy(obj) {
+    if (Object.prototype.toString.call(obj) === '[object Array]') {
+        var out = [], i = 0, len = obj.length;
+        for ( ; i < len; i++ ) {
+            out[i] = arguments.callee(obj[i]);
+        }
+        return out;
+    }
+    if (typeof obj === 'object') {
+        var out = {}, i;
+        for ( i in obj ) {
+            out[i] = arguments.callee(obj[i]);
+        }
+        return out;
+    }
+    return obj;
+}
+
+var setDefaults = function(object, defaults) {
+	for (key in defaults)
+		if(!object.hasOwnProperty(key))
+			object[key] = deepCopy(defaults[key])
 }
 
 var makeAbsolute = function(elements) {
@@ -21,6 +40,23 @@ var makeAbsolute = function(elements) {
 	});
 }
 
+/* Transitions functions.
+   the initialize() function is called once
+   the step() function is called at a given frequency and take the return of initialize() as arg.
+*/
+Transitions = {
+	fade: {
+		initialize: function(elements, params, callback) {
+			setDefaults(params, {delay: 0, duration: 500});
+			setTimeout(function() {
+				mFade(elements, params.duration, callback);
+			}, params.delay);
+		},
+		step: function(dt, initRet, params) {
+		}
+	}
+}
+
 /* Quick hack to avoid multiple call to callback function when using fadeout*/
 var mFade = function(element, time, callback) {
 	element.fadeOut(time);
@@ -31,15 +67,19 @@ var mFade = function(element, time, callback) {
  * Move to another node
  */
 var transitionTo = function(node) {
-	makeAbsolute($('.char'));
-	mFade($(':not(.clicked).adventure-text'), 200, function() {
-		mFade($('.adventure-text.clicked'), 200, function() {
-			$('#adventure').empty();
-			$('#adventure').append(buildNode(node));
-			$('#adventure').hide(); // todo : why
-			$('#adventure').fadeIn(200);
-		});
-	});;
+	var type = "fade";
+	if("transition" in node.properties)
+		type = node.properties.transition.type;
+	var transition = Transitions[type];
+	var transitionParameters = node.properties.transition;
+	if(!transitionParameters) {
+		transitionParameters = {};
+	};
+	transition.initialize($('#adventure'), transitionParameters, function() {
+		$('#adventure').empty();
+		$('#adventure').append(buildNode(node));
+		$('#adventure').fadeIn(200);
+	});
 }
 
 /*
@@ -77,6 +117,14 @@ var NodeFunctions = {
 	setFalse: function(node, parameter) {setValue(parameter, false)}
 }
 
+var updateChar = function(chr) {
+	if(Math.random() > $(chr).data('quality')) {
+		$(chr).text(random_character());
+	} else {
+		$(chr).text($(chr).data('realValue'));
+	}
+}
+
 /*
  * Function executed to add property to element (clickable, etc...)
  */
@@ -110,6 +158,28 @@ var PropertyFunctions = {
 		if(allTrue(parameter)) {
 			$(element).hide();
 		}
+	},
+
+	obfuscated: function(element, parameter) {
+		$(element).children().each(function(i, elt) {
+			$(elt).data('realValue', $(elt).text());
+			$(elt).data('quality', 0);
+			updateChar(elt);
+		});
+	},
+
+	waveable: function(element, parameter) {
+		$(element).children().each(function(i, elt) {
+			// if (!$(elt).data('quality')) {
+			// 	$(elt).data('quality',1);
+			// };
+			$(elt).mouseenter(function() {
+				var quality = $(elt).data('quality');
+				var step = (1-quality)/5;
+				$(elt).data('quality', quality+step);
+				updateChar(elt);
+			});
+		});
 	}
 }
 
