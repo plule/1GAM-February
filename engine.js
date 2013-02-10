@@ -20,6 +20,22 @@ var Transitions = {
 				$(this.elements).css({opacity: 1 - (elapsed/total)});
 			}
 		}
+	},
+	fly: {
+		initialize: function(elements, params) {
+			this.elements = elements;
+			splitElements(elements);
+			makeAbsolute(elements);
+		},
+		step: function(dt) {
+			this.elements.find('.char').each(function() {
+				var offset = $(this).offset();
+				var pos = $V([offset.left,offset.top]);
+				var dir = pos.subtract(State.mouse);
+				var pos = pos.add(dir.x(dt/5000));
+				$(this).offset({left: pos.e(1), top: pos.e(2)});
+			});
+		}
 	}
 }
 
@@ -60,7 +76,7 @@ var PropertyFunctions = {
 
 	obfuscated: function(element, parameter) {
 		splitElement(element);
-		$(element).children().each(function(i, elt) {
+		$(element).find('.char').each(function(i, elt) {
 			$(elt).data('realValue', $(elt).text());
 			$(elt).data('quality', 0);
 			updateChar(elt);
@@ -109,17 +125,24 @@ var State = {}
 var init = function() {
 	var valid = validateAdventure(Adventure);
 	if(valid == null) {
-		buildNode(Adventure.nodes[Adventure.startNode], $('#adventure'));
+		$('#adventure').append(buildNode(Adventure.nodes[Adventure.startNode]));
 	} else {
 		alert(valid)
 	}
 
+	State.mouse = $V([0,0]);
+	$(document).mousemove(function(event) {
+		State.mouse.setElements([event.pageX, event.pageY]);
+/*        State.mouse.x = event.pageX;
+        State.mouse.y = event.pageY;*/
+    });
+
 	State.lastUpdate = Date.now();
 	State.interval = setInterval(function() {
-	var now = Date.now();
-	var dt = now - State.lastUpdate;
-	State.lastUpdate = Date.now();
-	update(dt);
+		var now = Date.now();
+		var dt = now - State.lastUpdate;
+		State.lastUpdate = Date.now();
+		update(dt);
 	}, 16.6667);
 }
 
@@ -142,15 +165,12 @@ var transitionTo = function(node) {
 	var transition = Transitions[node.onEnter.transition.type];
 	var transitionParameters = node.onEnter.transition;
 
-	$('#adventure').children().each(function() {
-		debuildStringHtml(this);
-	});
-	transition.initialize($('#adventure').children(), transitionParameters);
+	transition.initialize($('.node'), transitionParameters);
 	State.transition = transition;
 	setTimeout(function() {
 		State.transition = null;
 		$('#adventure').empty();
-		buildNode(node, $('#adventure'));
+		$('#adventure').append(buildNode(node));
 		//$('#adventure').fadeIn(200);
 	}, transitionParameters.duration);
 }
@@ -223,17 +243,6 @@ var joinElements = function(elements) {
 }
 
 /*
- * Regroup char in individuals span
- */
-var debuildStringHtml = function(element) {
-	var original = $(element).clone();
-	$(element).empty();
-	$(original).each(function() {
-		$(element).append($(this).text());
-	});
-}
-
-/*
  * Build html element for a string
  */
 var buildStringHtml = function(text) {
@@ -258,7 +267,8 @@ var buildHtml = function(text, properties) {
 /*
  * Build html element of a complete node
  */
-var buildNode = function(node, output) {
+var buildNode = function(node) {
+	var output = $('<div>').addClass('node');
 	/* Execute onEnter */
 	for(onEnterFunc in node.onEnter) {
 		if(NodeFunctions[onEnterFunc]) {
@@ -280,6 +290,7 @@ var buildNode = function(node, output) {
 		lastIndex = linkExp.lastIndex;
 	}
 	output.append(buildHtml(text.substring(lastIndex), {}));
+	return output;
 }
 
 /*
