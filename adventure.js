@@ -13,7 +13,7 @@ The answer is blowin' in the wind.",
 				blowin: {clickDestination: "windNode"}
 			},
 			onEnter: {
-				transition: {type: "fly", duration: 2000}
+				transition: {type: "fly", duration: 2000, force: 0.05}
 			}
 		},
         beginNode: {

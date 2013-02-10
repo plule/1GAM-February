@@ -23,18 +23,23 @@ var Transitions = {
 	},
 	fly: {
 		initialize: function(elements, params) {
-			this.elements = elements;
+			setDefaults(params, {force: 0.05});
+			this.force = params.force;
 			splitElements(elements);
-			makeAbsolute(elements);
+			makeAbsolute(elements.find('.char'));
+			this.elements = elements.find('.char');
+			Transitions.fade.initialize(elements, params);
 		},
 		step: function(dt) {
-			this.elements.find('.char').each(function() {
-				var offset = $(this).offset();
-				var pos = $V([offset.left,offset.top]);
+			var force = this.force;
+			this.elements.each(function() {
+				var pos = $V([parseFloat(this.style.left),parseFloat(this.style.top)]);
 				var dir = pos.subtract(State.mouse);
-				var pos = pos.add(dir.x(dt/5000));
-				$(this).offset({left: pos.e(1), top: pos.e(2)});
+				pos = pos.add(dir.toUnitVector().x(dt*force));
+				this.style.left = pos.e(1)+'px';
+				this.style.top = pos.e(2)+'px';
 			});
+			Transitions.fade.step(dt);
 		}
 	}
 }
@@ -165,13 +170,13 @@ var transitionTo = function(node) {
 	var transition = Transitions[node.onEnter.transition.type];
 	var transitionParameters = node.onEnter.transition;
 
+
 	transition.initialize($('.node'), transitionParameters);
 	State.transition = transition;
 	setTimeout(function() {
 		State.transition = null;
 		$('#adventure').empty();
 		$('#adventure').append(buildNode(node));
-		//$('#adventure').fadeIn(200);
 	}, transitionParameters.duration);
 }
 
