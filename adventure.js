@@ -10,10 +10,10 @@ Before they're forever banned?\n\
 The answer, my friend, is blowin' in the wind,\n\
 The answer is blowin' in the wind.",
 			properties: {
-				blowin: {clickDestination: "beginNode"}
-			},
-			onEnter: {
-				transition: {type: "fly", duration: 2000, force: 0.05}
+				blowin: {
+					clickDestination: "beginNode",
+					transition: {type: "fly", duration: 2000, force: 0.05}
+				}
 			}
 		},
         beginNode: {
@@ -23,7 +23,10 @@ The answer is blowin' in the wind.",
 [ You already have visited The Hall.|alreadyVisitedHall]\
 [ You have visited everything.|everythingVisited]",
             properties: {
-				hall: {clickDestination: "hallNode"},
+				hall: {
+					clickDestination: "hallNode",
+					transition: {type: "fade", duration: 200}
+				},
 				room: {clickDestination: "roomNode", setTrue: "visitedRoom"},
 				alreadyVisitedRoom: {visibleIf: "visitedRoom"},
 				alreadyVisitedHall: {visibleIf: "visitedHall"},
@@ -37,10 +40,7 @@ The answer is blowin' in the wind.",
 				hall: {clickDestination: "hallNode"},
 				begin: {clickDestination: "beginNode"},
 				decayingText: {obfuscated: true, waveable: true}
-            },
-			onEnter: {
-				transition: {type: "fly", duration: 1000}
-			}
+            }
         },
 		hallNode: {
 			text: "You hall. Go to [The Beginning|begin]. Go to [The Room|room].",
@@ -48,10 +48,7 @@ The answer is blowin' in the wind.",
 				begin: {clickDestination: "beginNode"},
 				room: {clickDestination: "roomNode", setTrue: "visitedRoom"}
             },
-			onEnter: {
-				setTrue: "visitedHall,testFlag",
-				transition: {duration: 2000, delay: 1000}
-			}
+			onEnter: {setTrue: "visitedHall,testFlag"}
 		}
     },
 	startNode: 'windNode'

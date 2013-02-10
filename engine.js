@@ -5,12 +5,10 @@
  */
 var Transitions = {
 	fade: {
-		initialize: function(elements, params) {
-			setDefaults(params, {delay: 0});
+		initialize: function(elements) {
+			setDefaults(this, {delay: 0});
 			this.time = 0;
 			this.elements = elements;
-			this.delay = params.delay
-			this.duration = params.duration;
 		},
 		step: function(dt) {
 			this.time = this.time+dt;
@@ -22,13 +20,12 @@ var Transitions = {
 		}
 	},
 	fly: {
-		initialize: function(elements, params) {
-			setDefaults(params, {force: 0.05});
-			this.force = params.force;
+		initialize: function(elements) {
+			$(elements).fadeOut(this.duration);
+			setDefaults(this, {force: 0.05});
 			splitElements(elements);
-			makeAbsolute(elements.find('.char'));
 			this.elements = elements.find('.char');
-			Transitions.fade.initialize(elements, params);
+			makeAbsolute(elements.find('.char'));
 		},
 		step: function(dt) {
 			var force = this.force;
@@ -39,7 +36,6 @@ var Transitions = {
 				this.style.left = pos.e(1)+'px';
 				this.style.top = pos.e(2)+'px';
 			});
-			Transitions.fade.step(dt);
 		}
 	}
 }
@@ -57,6 +53,13 @@ var PropertyFunctions = {
 				}
 				transitionTo(Adventure.nodes[parameter]);
 			});
+	},
+
+	transition: function(element, parameter) {
+		addCallback(element, function() {
+			for(i in parameter)
+				State.transition[i] = parameter[i];
+		});
 	},
 
 	setTrue: function(element, parameter) {
@@ -122,7 +125,9 @@ var NodeFunctions = {
 /*
  * Current state (include current transition)
  */
-var State = {}
+var State = {
+	transition: {}
+}
 
 /*
  * Called once at the begining
@@ -138,8 +143,6 @@ var init = function() {
 	State.mouse = $V([0,0]);
 	$(document).mousemove(function(event) {
 		State.mouse.setElements([event.pageX, event.pageY]);
-/*        State.mouse.x = event.pageX;
-        State.mouse.y = event.pageY;*/
     });
 
 	State.lastUpdate = Date.now();
@@ -155,7 +158,7 @@ var init = function() {
  * Called every few millis
  */
 var update = function(dt) {
-	if(State.transition) {
+	if(State.transition.step) {
 		State.transition.step(dt);
 	}
 }
@@ -164,19 +167,16 @@ var update = function(dt) {
  * Move to another node
  */
 var transitionTo = function(node) {
-	setDefaults(node, {onEnter : {}});
-	setDefaults(node.onEnter, {transition: {}});
-	setDefaults(node.onEnter.transition, {type: "fade", duration: 500});
-	var transition = Transitions[node.onEnter.transition.type];
-	var transitionParameters = node.onEnter.transition;
+	setDefaults(State.transition, {type: "fade", duration: 500});
+	State.transition.initialize = Transitions[State.transition.type].initialize;
+	State.transition.step = Transitions[State.transition.type].step;
 
-	transition.initialize($('.node'), transitionParameters);
-	State.transition = transition;
+	State.transition.initialize($('.node'));
 	setTimeout(function() {
-		State.transition = null;
+		State.transition = {};
 		$('#adventure').empty();
 		$('#adventure').append(buildNode(node));
-	}, transitionParameters.duration);
+	}, State.transition.duration);
 
 }
 
