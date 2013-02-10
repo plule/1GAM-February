@@ -6,14 +6,18 @@
 var Transitions = {
 	fade: {
 		initialize: function(elements, params) {
-			var datas = {time: 0, elements: elements};
 			setDefaults(params, {delay: 0});
-			return datas;
+			this.time = 0;
+			this.elements = elements;
+			this.delay = params.delay
+			this.duration = params.duration;
 		},
-		step: function(dt, datas, parameters) {
-			datas.time = datas.time+dt;
-			if(datas.time > parameters.delay) {
-				$(datas.elements).css({opacity: 1 - (datas.time-parameters.delay)/(parameters.duration-parameters.delay)});
+		step: function(dt) {
+			this.time = this.time+dt;
+			if(this.time > this.delay) {
+				var elapsed = this.time-this.delay;
+				var total = this.duration-this.delay;
+				$(this.elements).css({opacity: 1 - (elapsed/total)});
 			}
 		}
 	}
@@ -124,7 +128,7 @@ var init = function() {
  */
 var update = function(dt) {
 	if(State.transition) {
-		State.transition.step(dt, State.transition.datas, State.transition.parameters);
+		State.transition.step(dt);
 	}
 }
 
@@ -141,8 +145,7 @@ var transitionTo = function(node) {
 	$('#adventure').children().each(function() {
 		debuildStringHtml(this);
 	});
-	transition.datas = transition.initialize($('#adventure').children(), transitionParameters);
-	transition.parameters = transitionParameters;
+	transition.initialize($('#adventure').children(), transitionParameters);
 	State.transition = transition;
 	setTimeout(function() {
 		State.transition = null;
