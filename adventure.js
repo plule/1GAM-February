@@ -31,7 +31,7 @@ Adventure = {
             },
 			onEnter: {
 				setTrue: "visitedHall,testFlag",
-				transition: {duration: 50}
+				transition: {duration: 2000, delay: 1000}
 			}
 		}
     },

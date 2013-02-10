@@ -5,13 +5,16 @@
  */
 var Transitions = {
 	fade: {
-		initialize: function(elements, params, callback) {
+		initialize: function(elements, params) {
+			var datas = {time: 0, elements: elements};
 			setDefaults(params, {delay: 0});
-			setTimeout(function() {
-				mFade(elements, params.duration, callback);
-			}, params.delay);
+			return datas;
 		},
-		step: function(dt, initRet, params) {
+		step: function(dt, datas, parameters) {
+			datas.time = datas.time+dt;
+			if(datas.time > parameters.delay) {
+				$(datas.elements).css({opacity: 1 - (datas.time-parameters.delay)/(parameters.duration-parameters.delay)});
+			}
 		}
 	}
 }
@@ -92,6 +95,40 @@ var NodeFunctions = {
 }
 
 /*
+ * Current state (include current transition)
+ */
+var State = {}
+
+/*
+ * Called once at the begining
+ */
+var init = function() {
+	var valid = validateAdventure(Adventure);
+	if(valid == null) {
+		buildNode(Adventure.nodes[Adventure.startNode], $('#adventure'));
+	} else {
+		alert(valid)
+	}
+
+	State.lastUpdate = Date.now();
+	State.interval = setInterval(function() {
+	var now = Date.now();
+	var dt = now - State.lastUpdate;
+	State.lastUpdate = Date.now();
+	update(dt);
+	}, 16.6667);
+}
+
+/*
+ * Called every few millis
+ */
+var update = function(dt) {
+	if(State.transition) {
+		State.transition.step(dt, State.transition.datas, State.transition.parameters);
+	}
+}
+
+/*
  * Move to another node
  */
 var transitionTo = function(node) {
@@ -104,11 +141,15 @@ var transitionTo = function(node) {
 	$('#adventure').children().each(function() {
 		debuildStringHtml(this);
 	});
-	transition.initialize($('#adventure'), transitionParameters, function() {
+	transition.datas = transition.initialize($('#adventure').children(), transitionParameters);
+	transition.parameters = transitionParameters;
+	State.transition = transition;
+	setTimeout(function() {
+		State.transition = null;
 		$('#adventure').empty();
 		buildNode(node, $('#adventure'));
-		$('#adventure').fadeIn(200);
-	});
+		//$('#adventure').fadeIn(200);
+	}, transitionParameters.duration);
 }
 
 /*
@@ -320,9 +361,4 @@ var mFade = function(element, time, callback) {
 	setTimeout(callback, time);
 }
 
-var valid = validateAdventure(Adventure);
-if(valid == null) {
-	buildNode(Adventure.nodes[Adventure.startNode], $('#adventure'));
-} else {
-	alert(valid)
-}
+init();
