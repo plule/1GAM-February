@@ -159,7 +159,32 @@ var update = function(dt) {
  * Move to another node
  */
 var transitionTo = function(node) {
-	setDefaults(node, {onEnter : {}});
+	var elements = $('.node');
+	splitElements(elements);
+	makeAbsolute($('.char'));
+	$('.char').css({t:0}).animate({t:1},{
+		duration: 100000,
+		step: function(t, fx) {
+			var pos = $V([parseFloat(this.style.left),parseFloat(this.style.top)]);
+			var dir = pos.subtract(State.mouse);
+			var pos = pos.add(dir.toUnitVector());
+			this.style.left = pos.e(1)+'px';
+			this.style.top = pos.e(2)+'px';
+		}							   
+	});
+//	$('.char').css({left:0}).animate({left:50},{
+//		duration: 10000});
+/*		step: function(t, fx) {
+			var offset = $(this).offset();
+			$(this).offset({left: offset.left+1, top: offset.top+1});
+
+			var pos = $V([offset.left,offset.top]);
+			var dir = pos.subtract(State.mouse);
+			var pos = pos.add(dir.toUnitVector());
+			$(this).offset({left: pos.e(1), top: pos.e(2)});
+		}
+	});*/
+/*	setDefaults(node, {onEnter : {}});
 	setDefaults(node.onEnter, {transition: {}});
 	setDefaults(node.onEnter.transition, {type: "fade", duration: 500});
 	var transition = Transitions[node.onEnter.transition.type];
@@ -172,7 +197,7 @@ var transitionTo = function(node) {
 		$('#adventure').empty();
 		$('#adventure').append(buildNode(node));
 		//$('#adventure').fadeIn(200);
-	}, transitionParameters.duration);
+	}, transitionParameters.duration);*/
 }
 
 /*
