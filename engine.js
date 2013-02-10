@@ -213,9 +213,12 @@ var allTrue = function(flagString) {
 var splitElement = function(element) {
 	var original = $(element).clone();
 	$(element).empty();
-	var text = $(original).text();
+	var text = $(original).html().replace(/<br\s*[\/]?>/gi, "\n");
 	for(chr in text) {
-		$(element).append($('<span>'+text[chr]+'</span>').addClass('char').addClass('splitted'));
+		if(text[chr] === "\n")
+			$(element).append($('<br>'));
+		else
+			$(element).append($('<span>'+text[chr]+'</span>').addClass('char').addClass('splitted'));
 	};
 }
 
@@ -260,6 +263,7 @@ var buildStringHtml = function(text) {
  */
 var buildHtml = function(text, properties) {
 	if(!text) { return $('')};
+	text = text.replace(/\n/g, '<br />');
 	var output = buildStringHtml(text).addClass('adventure-text');
 	for (var property in properties) {
 		if(PropertyFunctions[property]) {

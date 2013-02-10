@@ -10,7 +10,7 @@ Before they're forever banned?\n\
 The answer, my friend, is blowin' in the wind,\n\
 The answer is blowin' in the wind.",
 			properties: {
-				blowin: {clickDestination: "windNode"}
+				blowin: {clickDestination: "beginNode"}
 			},
 			onEnter: {
 				transition: {type: "fly", duration: 2000, force: 0.05}
