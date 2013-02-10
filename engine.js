@@ -170,7 +170,6 @@ var transitionTo = function(node) {
 	var transition = Transitions[node.onEnter.transition.type];
 	var transitionParameters = node.onEnter.transition;
 
-
 	transition.initialize($('.node'), transitionParameters);
 	State.transition = transition;
 	setTimeout(function() {
@@ -178,6 +177,7 @@ var transitionTo = function(node) {
 		$('#adventure').empty();
 		$('#adventure').append(buildNode(node));
 	}, transitionParameters.duration);
+
 }
 
 /*
