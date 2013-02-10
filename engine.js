@@ -3,8 +3,8 @@ function random_character() {
 }
 
 /*
-  Source : http://james.padolsey.com/javascript/deep-copying-of-objects-and-arrays/
-*/
+ * Source : http://james.padolsey.com/javascript/deep-copying-of-objects-and-arrays/
+ */
 function deepCopy(obj) {
     if (Object.prototype.toString.call(obj) === '[object Array]') {
         var out = [], i = 0, len = obj.length;
@@ -23,6 +23,9 @@ function deepCopy(obj) {
     return obj;
 }
 
+/*
+ * Fill an object with defaults values
+ */
 var setDefaults = function(object, defaults) {
 	for (key in defaults)
 		if(!object.hasOwnProperty(key))
@@ -40,14 +43,15 @@ var makeAbsolute = function(elements) {
 	});
 }
 
-/* Transitions functions.
-   the initialize() function is called once
-   the step() function is called at a given frequency and take the return of initialize() as arg.
-*/
+/*
+ * Transitions functions.
+ * the initialize() function is called once
+ * the step() function is called at a given frequency and take the return of initialize() as arg.
+ */
 Transitions = {
 	fade: {
 		initialize: function(elements, params, callback) {
-			setDefaults(params, {delay: 0, duration: 500});
+			setDefaults(params, {delay: 0});
 			setTimeout(function() {
 				mFade(elements, params.duration, callback);
 			}, params.delay);
@@ -67,17 +71,19 @@ var mFade = function(element, time, callback) {
  * Move to another node
  */
 var transitionTo = function(node) {
-	var type = "fade";
-	if("transition" in node.properties)
-		type = node.properties.transition.type;
-	var transition = Transitions[type];
-	var transitionParameters = node.properties.transition;
-	if(!transitionParameters) {
-		transitionParameters = {};
-	};
+	setDefaults(node, {onEnter : {}});
+	setDefaults(node.onEnter, {transition: {}});
+	setDefaults(node.onEnter.transition, {type: "fade", duration: 500});
+	var transition = Transitions[node.onEnter.transition.type];
+	var transitionParameters = node.onEnter.transition;
+
+	$('#adventure').children().each(function() {
+		debuildStringHtml(this);
+	});
 	transition.initialize($('#adventure'), transitionParameters, function() {
 		$('#adventure').empty();
-		$('#adventure').append(buildNode(node));
+		buildNode(node, $('#adventure'));
+//		$('#adventure').append(buildNode(node));
 		$('#adventure').fadeIn(200);
 	});
 }
@@ -184,15 +190,63 @@ var PropertyFunctions = {
 }
 
 /*
- * Build html element for a string separing each character
+ * Split html element by char
+ */
+var splitElement = function(element) {
+	var original = $(element).clone();
+	$(element).empty();
+	var text = $(original).text();
+	for(chr in text) {
+		$(element).append($('<span>'+text[chr]+'</span>').addClass('char').addClass('splitted'));
+	};
+}
+
+/*
+ * Join each splitted element
+ */
+var joinElement = function(element) {
+	$(element).find('.splitted').each(function() {
+		$(this).parent().append($(this).text());
+		$(this).remove();
+	});
+}
+
+/*
+ * Split multiple element by char
+ */
+var splitElements = function(elements) {
+	$(elements).find('.adventure-text').each(function() {
+		splitElement(this);
+	});
+}
+
+/*
+ * Join multiple elements
+ */
+var joinElements = function(elements) {
+	$(elements).find('.adventure-text').each(function() {
+		joinElement(this);
+	});
+}
+
+/*
+ * Regroup char in individuals span
+ */
+var debuildStringHtml = function(element) {
+	var original = $(element).clone();
+	$(element).empty();
+	$(original).each(function() {
+		$(element).append($(this).text());
+	});
+}
+
+/*
+ * Build html element for a string
  */
 var buildStringHtml = function(text) {
-	var output = $('<span>');
-	for(chr in text) {
-		output.append($('<span>'+text[chr]+'</span>').addClass('char'));
-	}
-	return output;
+	return $('<span>').append(text);
 }
+
 
 /*
  * Build html element of a element (formatted or not)
@@ -211,7 +265,7 @@ var buildHtml = function(text, properties) {
 /*
  * Build html element of a complete node
  */
-var buildNode = function(node) {
+var buildNode = function(node, output) {
 	/* Execute onEnter */
 	for(onEnterFunc in node.onEnter) {
 		if(NodeFunctions[onEnterFunc]) {
@@ -219,11 +273,7 @@ var buildNode = function(node) {
 		}
 	}
 
-/*	console.log("Flags :");
-	console.log(Flags);*/
-
 	/* Build the html itself */
-	var output = $(document.createElement('div'));
 	var linkExp =  /\[([^\[\]\|]+)\|(\w+)\]/g;
 	var text = node.text;
 
@@ -237,8 +287,6 @@ var buildNode = function(node) {
 		lastIndex = linkExp.lastIndex;
 	}
 	output.append(buildHtml(text.substring(lastIndex), {}));
-
-	return output;
 }
 
 /*
@@ -274,7 +322,7 @@ var validateAdventure = function(adventure) {
 
 var valid = validateAdventure(Adventure);
 if(valid == null) {
-	$('#adventure').append(buildNode(Adventure.nodes[Adventure.startNode]));
+	buildNode(Adventure.nodes[Adventure.startNode], $('#adventure'));
 } else {
 	alert(valid)
 }
