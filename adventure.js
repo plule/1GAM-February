@@ -30,7 +30,8 @@ Adventure = {
 				room: {clickDestination: "roomNode", setTrue: "visitedRoom"}
             },
 			onEnter: {
-				setTrue: "visitedHall,testFlag"
+				setTrue: "visitedHall,testFlag",
+				transition: {duration: 50}
 			}
 		}
     },
